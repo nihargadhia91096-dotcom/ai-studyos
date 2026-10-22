@@ -2,13 +2,20 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import { fileURLToPath } from "node:url";
+import { clerkAuthMiddleware } from "./middleware/clerk-auth.middleware.js";
 import { createConversationRouter } from "./routes/conversation.routes.js";
 import pdfRoutes from "./routes/pdf.routes.js";
 
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+    cors({
+        credentials: true,
+        origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
+    }),
+);
+app.use(clerkAuthMiddleware());
 app.use(express.json());
 
 // PDF routes

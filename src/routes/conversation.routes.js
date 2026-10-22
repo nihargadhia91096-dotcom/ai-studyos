@@ -50,6 +50,18 @@ function createConversationRouter({
         });
     });
 
+    router.post("/profile", async (req, res) => {
+        return withIdentity(req, res, async (service, clerkId) => {
+            const user = await service.upsertUser({
+                clerkId,
+                email: req.body?.email,
+                name: req.body?.name,
+            });
+
+            return res.status(200).json({ success: true, user });
+        });
+    });
+
     router.post("/", async (req, res) => {
         return withIdentity(req, res, async (service, clerkId) => {
             const conversation = await service.createConversation({
