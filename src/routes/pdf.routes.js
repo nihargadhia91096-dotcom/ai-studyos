@@ -97,6 +97,7 @@ console.log(`PDF split into ${chunks.length} chunks`);
             success: true,
             message: "PDF uploaded, processed, embedded, and stored successfully.",
             filename: req.file.originalname,
+            storageFilename: req.file.filename,
             totalPages: pdfData.total,
             totalChunks: chunks.length,
             storedChunks,
