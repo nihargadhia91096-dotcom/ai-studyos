@@ -25,6 +25,8 @@ The project is being developed to let users upload study documents and eventuall
 | ChromaDB | Planned vector storage |
 | Google Gemini | Planned embeddings and AI integration |
 | Prisma + PostgreSQL | Conversation persistence |
+| React + Vite | Authenticated study workspace |
+| Clerk | User authentication |
 
 ## 📂 Project Structure
 
@@ -50,6 +52,8 @@ ai-studyos/
 - Node.js
 - npm
 - Git
+- PostgreSQL
+- ChromaDB running at `http://localhost:8000`
 
 ### 1. Clone the repository
 
@@ -73,9 +77,19 @@ Add your Google API key and PostgreSQL connection string:
 ```env
 GOOGLE_API_KEY=your_api_key_here
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/ai_studyos
+CLERK_SECRET_KEY=your_clerk_secret_key
+FRONTEND_ORIGIN=http://localhost:5173
 ```
 
 **Security:** Never commit your real API key to GitHub.
+
+For the React client, set these environment variables locally when starting the
+frontend (they are intentionally not stored in the repository):
+
+```text
+VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+VITE_API_URL=http://localhost:5000
+```
 
 ### 4. Prepare the database
 
@@ -97,6 +111,18 @@ The backend runs at:
 ```text
 http://localhost:5000
 ```
+
+### 6. Start the web app
+
+In a second terminal:
+
+```bash
+npm install --prefix web
+npm run web:dev
+```
+
+Open `http://localhost:5173`, sign in with Clerk, upload a PDF, and begin a
+document-grounded study session.
 
 ## 🔌 API Endpoints
 
@@ -151,6 +177,8 @@ identity provider) before exposing them to clients.
 - [x] PDF upload API
 - [x] PDF text extraction
 - [x] Text chunking
+- [x] React study workspace
+- [x] Clerk-backed API authentication
 - [ ] Generate text embeddings
 - [ ] Store embeddings in ChromaDB
 - [ ] Implement semantic search

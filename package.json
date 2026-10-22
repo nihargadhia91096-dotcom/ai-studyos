@@ -5,7 +5,9 @@
         "dev": "nodemon src/app.js",
         "test": "node --test test/*.test.js",
         "prisma:generate": "prisma generate",
-        "prisma:validate": "prisma validate"
+        "prisma:validate": "prisma validate",
+        "web:dev": "npm --prefix web run dev",
+        "web:build": "npm --prefix web run build"
     },
     "dependencies": {
         "@clerk/express": "^2.1.82",
