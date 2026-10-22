@@ -1,21 +1,29 @@
 {
+    "type": "module",
     "scripts": {
         "start": "node src/app.js",
-        "dev": "nodemon src/app.js"
+        "dev": "nodemon src/app.js",
+        "test": "node --test test/*.test.js",
+        "prisma:generate": "prisma generate",
+        "prisma:validate": "prisma validate"
     },
     "dependencies": {
         "@langchain/community": "^1.1.29",
         "@langchain/core": "^1.2.18",
         "@langchain/google-genai": "^2.3.2",
         "@langchain/textsplitters": "^1.0.2",
+        "@prisma/adapter-pg": "^7.10.1",
+        "@prisma/client": "^7.10.1",
         "chromadb": "^3.5.0",
         "cors": "^2.8.6",
         "dotenv": "^18.0.8",
         "express": "^5.3.0",
         "multer": "^2.4.0",
-        "pdf-parse": "^2.4.5"
+        "pdf-parse": "^2.4.5",
+        "pg": "^8.23.1"
     },
     "devDependencies": {
-        "nodemon": "^3.1.14"
+        "nodemon": "^3.1.14",
+        "prisma": "^7.10.1"
     }
 }

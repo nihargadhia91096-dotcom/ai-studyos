@@ -1,4 +1,4 @@
-const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
 const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 500,
@@ -15,4 +15,4 @@ async function splitText(text) {
     return chunks;
 }
 
-module.exports = { splitText };
+export { splitText };

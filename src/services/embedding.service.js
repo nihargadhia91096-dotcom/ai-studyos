@@ -1,4 +1,4 @@
-const { GoogleGenerativeAIEmbeddings } = require("@langchain/google-genai");
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 
 const embeddings = new GoogleGenerativeAIEmbeddings({
     model: "gemini-embedding-001",
@@ -21,7 +21,7 @@ async function generateEmbeddings(chunks) {
     return await embeddings.embedDocuments(chunks);
 }
 
-module.exports = {
+export {
     generateEmbedding,
     generateEmbeddings,
 };

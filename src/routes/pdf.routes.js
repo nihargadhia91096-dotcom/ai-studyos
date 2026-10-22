@@ -1,17 +1,19 @@
-const express = require("express");
-const { generateAnswer } = require("../services/llm.service");
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-const { PDFParse } = require("pdf-parse");
-
-const { splitText } = require("../services/chunk.service");
-const {
+import express from "express";
+import multer from "multer";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { PDFParse } from "pdf-parse";
+import { generateAnswer } from "../services/llm.service.js";
+import { splitText } from "../services/chunk.service.js";
+import {
     storeChunks,
     searchChunks,
-} = require("../services/chroma.service");
+    deleteDocument,
+} from "../services/chroma.service.js";
 
 const router = express.Router();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const uploadDir = path.join(__dirname, "../../documents");
 
@@ -59,10 +61,24 @@ router.post("/upload", upload.single("pdf"), async (req, res) => {
             data: dataBuffer
         });
 
-        const pdfData = await parser.getText();
-        const chunks = await splitText(pdfData.text);
+  const pdfData = await parser.getText();
 
-        console.log(`PDF split into ${chunks.length} chunks`);
+let chunks = [];
+let chunkIndex = 0;
+
+for (const page of pdfData.pages) {
+    const pageChunks = await splitText(page.text);
+
+    for (const chunk of pageChunks) {
+        chunks.push({
+            text: chunk,
+            page: page.num,
+            chunkIndex: chunkIndex++,
+        });
+    }
+}
+
+console.log(`PDF split into ${chunks.length} chunks`);
 
         if (chunks.length === 0) {
             return res.status(400).json({
@@ -70,12 +86,12 @@ router.post("/upload", upload.single("pdf"), async (req, res) => {
                 message: "No extractable text was found in the PDF."
             });
         }
-
-        const storedChunks = await storeChunks(chunks, {
-            source: req.file.originalname,
-            filename: req.file.filename,
-            totalPages: pdfData.total
-        });
+        await deleteDocument(req.file.originalname);
+     const storedChunks = await storeChunks(chunks, {
+    source: req.file.originalname,
+    filename: req.file.filename,
+    totalPages: pdfData.total,
+});
 
         return res.status(200).json({
             success: true,
@@ -104,7 +120,7 @@ router.post("/upload", upload.single("pdf"), async (req, res) => {
 });
 router.post("/search", async (req, res) => {
     try {
-        const { query, k = 3 } = req.body;
+       const { query, k = 3, filename, history = [] } = req.body;
 
         // Validate the question
         if (typeof query !== "string" || !query.trim()) {
@@ -129,7 +145,11 @@ router.post("/search", async (req, res) => {
         }
 
         // Step 1: Retrieve relevant chunks from ChromaDB
-        const results = await searchChunks(query.trim(), resultCount);
+    const results = await searchChunks(
+    query.trim(),
+    resultCount,
+    filename || null
+);
 
         if (results.length === 0) {
             return res.status(200).json({
@@ -148,17 +168,25 @@ router.post("/search", async (req, res) => {
             .join("\n\n");
 
         // Step 3: Generate an answer using Gemini
-        const answer = await generateAnswer(query.trim(), context);
+        const answer = await generateAnswer(
+    query.trim(),
+    context,
+    history
+);;
 
         // Step 4: Return the answer and its sources
         return res.status(200).json({
             success: true,
             query: query.trim(),
             answer,
-            sources: results.map((doc) => ({
-                content: doc.pageContent,
-                metadata: doc.metadata,
-            })),
+         sources: results.map((doc, index) => ({
+    sourceId: index + 1,
+    filename: doc.metadata.filename,
+    originalName: doc.metadata.source,
+    page: doc.metadata.page ?? null,
+    chunkIndex: doc.metadata.chunkIndex,
+    content: doc.pageContent,
+})),
         });
     } catch (error) {
         console.error("RAG search error:", error);
@@ -170,4 +198,4 @@ router.post("/search", async (req, res) => {
         });
     }
 });
-module.exports = router;
+export default router;

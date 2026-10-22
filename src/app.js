@@ -1,8 +1,8 @@
-require("dotenv").config();
-
-const express = require("express");
-const cors = require("cors");
-const pdfRoutes = require("./routes/pdf.routes");
+import "dotenv/config";
+import cors from "cors";
+import express from "express";
+import { fileURLToPath } from "node:url";
+import pdfRoutes from "./routes/pdf.routes.js";
 
 const app = express();
 
@@ -30,7 +30,12 @@ app.get("/api/health", (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
+const isMainModule = process.argv[1] === fileURLToPath(import.meta.url);
 
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-});
+if (isMainModule) {
+    app.listen(PORT, () => {
+        console.log(`Server running at http://localhost:${PORT}`);
+    });
+}
+
+export default app;

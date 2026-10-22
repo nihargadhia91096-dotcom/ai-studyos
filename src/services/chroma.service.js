@@ -1,7 +1,5 @@
-const { Chroma } = require("@langchain/community/vectorstores/chroma");
-const {
-    GoogleGenerativeAIEmbeddings,
-} = require("@langchain/google-genai");
+import { Chroma } from "@langchain/community/vectorstores/chroma";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 
 const embeddings = new GoogleGenerativeAIEmbeddings({
     model: "gemini-embedding-001",
@@ -22,11 +20,12 @@ async function storeChunks(chunks, metadata = {}) {
 
     const vectorStore = await getVectorStore();
 
-    const documents = chunks.map((chunk, index) => ({
-        pageContent: chunk,
+    const documents = chunks.map((chunk) => ({
+        pageContent: chunk.text,
         metadata: {
             ...metadata,
-            chunkIndex: index,
+            page: chunk.page,
+            chunkIndex: chunk.chunkIndex,
         },
     }));
 
@@ -34,19 +33,40 @@ async function storeChunks(chunks, metadata = {}) {
 
     return documents.length;
 }
+async function deleteDocument(originalName) {
+    if (!originalName) {
+        throw new Error("Original filename is required.");
+    }
 
-async function searchChunks(query, k = 3) {
+    const vectorStore = await getVectorStore();
+
+    await vectorStore.delete({
+        filter: {
+            source: originalName,
+        },
+    });
+}
+async function searchChunks(query, k = 3, filename = null) {
     if (!query || !query.trim()) {
         throw new Error("Search query cannot be empty.");
     }
 
     const vectorStore = await getVectorStore();
 
-    return await vectorStore.similaritySearch(query, k);
+    const filter = filename
+        ? { filename: filename }
+        : undefined;
+
+    return await vectorStore.similaritySearch(
+        query,
+        k,
+        filter
+    );
 }
 
-module.exports = {
+export {
     getVectorStore,
     storeChunks,
     searchChunks,
+    deleteDocument,
 };
