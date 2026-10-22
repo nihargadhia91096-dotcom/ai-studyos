@@ -9,7 +9,7 @@ const embeddings = new GoogleGenerativeAIEmbeddings({
 async function getVectorStore() {
     return new Chroma(embeddings, {
         collectionName: "ai_studyos",
-        url: "http://localhost:8000",
+        url: process.env.CHROMA_URL || "http://localhost:8000",
     });
 }
 

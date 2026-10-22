@@ -1,0 +1,12 @@
+.git
+.agents
+.claude
+.cursor
+.devin
+node_modules
+web/node_modules
+web/dist
+documents
+.env
+.env.*
+npm-debug.log*

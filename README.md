@@ -124,6 +124,35 @@ npm run web:dev
 Open `http://localhost:5173`, sign in with Clerk, upload a PDF, and begin a
 document-grounded study session.
 
+## 🚢 Container deployment
+
+The repository includes a production-oriented Compose stack: React is served by
+Nginx on port `8080`, requests under `/api` are proxied to Express, and named
+Docker volumes retain PostgreSQL data, Chroma vectors, and uploaded PDFs.
+
+Use your deployment platform's secret manager, or export the following values
+in the deployment shell. Do not put them in a committed file:
+
+```text
+POSTGRES_PASSWORD
+GOOGLE_API_KEY
+CLERK_SECRET_KEY
+CLERK_PUBLISHABLE_KEY
+FRONTEND_ORIGIN
+```
+
+`FRONTEND_ORIGIN` must be the public application origin (for example,
+`https://study.example.com`; use `http://localhost:8080` for a local Compose
+run). Configure that same origin and redirect URL in Clerk, then start:
+
+```bash
+docker compose up --build -d
+```
+
+The API applies committed Prisma migrations before it starts. After the stack
+is healthy, open the configured public origin and verify sign-in, a PDF upload,
+and a document-grounded question.
+
 ## 🔌 API Endpoints
 
 ### Health Check
