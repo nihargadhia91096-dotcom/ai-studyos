@@ -11,6 +11,7 @@ The project is being developed to let users upload study documents and eventuall
 - **Text Chunking:** Split extracted text into smaller, overlapping chunks for downstream processing.
 - **REST API:** Backend built with Node.js and Express.
 - **File Upload Handling:** Handle PDF uploads using Multer.
+- **Conversation Persistence:** Prisma-backed user, conversation, and message storage with ownership-scoped operations.
 
 ## 🛠️ Tech Stack
 
@@ -23,6 +24,7 @@ The project is being developed to let users upload study documents and eventuall
 | LangChain.js | Text splitting and future RAG integration |
 | ChromaDB | Planned vector storage |
 | Google Gemini | Planned embeddings and AI integration |
+| Prisma + PostgreSQL | Conversation persistence |
 
 ## 📂 Project Structure
 
@@ -66,15 +68,25 @@ npm install
 
 Create a `.env` file in the project root.
 
-Add your Google API key when you configure the Gemini integration:
+Add your Google API key and PostgreSQL connection string:
 
 ```env
 GOOGLE_API_KEY=your_api_key_here
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/ai_studyos
 ```
 
 **Security:** Never commit your real API key to GitHub.
 
-### 4. Start the development server
+### 4. Prepare the database
+
+Generate the Prisma client and apply the committed migration to the configured database:
+
+```bash
+npm run prisma:generate
+npx prisma migrate deploy
+```
+
+### 5. Start the development server
 
 ```bash
 npm run dev
@@ -119,6 +131,21 @@ Use Postman with:
 
 A successful response includes the filename, page count, number of chunks, and extracted text chunks.
 
+### Conversation API
+
+The conversation routes preserve conversation history independently of the client:
+
+- `GET /api/conversations`
+- `POST /api/conversations`
+- `GET /api/conversations/:conversationId`
+- `POST /api/conversations/:conversationId/messages`
+- `DELETE /api/conversations/:conversationId`
+
+These routes require verified authentication middleware to provide the current
+user's Clerk ID at `req.auth.userId`. They intentionally reject unauthenticated
+requests and never trust a client-supplied user ID. Connect Clerk (or another
+identity provider) before exposing them to clients.
+
 ## 🗺️ Roadmap
 
 - [x] PDF upload API
@@ -129,7 +156,8 @@ A successful response includes the filename, page count, number of chunks, and e
 - [ ] Implement semantic search
 - [ ] Integrate an LLM for document-based question answering
 - [ ] Build a frontend for document uploads and chat
-- [ ] Add user authentication and document management
+- [ ] Connect verified authentication middleware to the conversation API
+- [ ] Add document management
 
 ## 🔐 Security
 

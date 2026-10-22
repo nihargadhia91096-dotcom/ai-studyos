@@ -2,6 +2,7 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import { fileURLToPath } from "node:url";
+import { createConversationRouter } from "./routes/conversation.routes.js";
 import pdfRoutes from "./routes/pdf.routes.js";
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 
 // PDF routes
 app.use("/api/pdf", pdfRoutes);
+app.use("/api/conversations", createConversationRouter());
 
 // Homepage endpoint
 app.get("/", (req, res) => {
