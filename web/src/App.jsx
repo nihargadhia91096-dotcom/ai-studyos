@@ -1,3 +1,6 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 import {
     SignInButton,
     UserButton,
@@ -36,6 +39,14 @@ function App() {
 function StudyWorkspace() {
     const { getToken } = useAuth();
     const { user } = useUser();
+    const [theme, setTheme] = useState(
+    () => localStorage.getItem("studyos-theme") || "light"
+);
+
+useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("studyos-theme", theme);
+}, [theme]);
     const [conversations, setConversations] = useState([]);
     const [activeConversation, setActiveConversation] = useState(null);
     const [documents, setDocuments] = useState([]);
@@ -245,10 +256,25 @@ function StudyWorkspace() {
                         <p className="eyebrow">Grounded study assistant</p>
                         <h1>{activeConversation?.title || "Start a study session"}</h1>
                     </div>
-                    <label className="upload-button">
-                        {isUploading ? "Processing PDF…" : "Upload PDF"}
-                        <input accept="application/pdf" disabled={isUploading} onChange={uploadDocument} type="file" />
-                    </label>
+                 <div className="header-actions">
+    <button
+        className="theme-toggle"
+        type="button"
+        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+    >
+        {theme === "light" ? "🌙 Dark mode" : "☀️ Light mode"}
+    </button>
+
+    <label className="upload-button">
+        {isUploading ? "Processing PDF…" : "Upload PDF"}
+        <input
+            accept="application/pdf"
+            disabled={isUploading}
+            onChange={uploadDocument}
+            type="file"
+        />
+    </label>
+</div>
                 </header>
 
                 {documents.length ? (
@@ -279,7 +305,11 @@ function StudyWorkspace() {
                 <div className="messages">
                     {activeConversation?.messages?.map((message, index) => (
                         <article className={`message ${message.role.toLowerCase()}`} key={`${message.createdAt || index}-${message.role}`}>
-                            <p>{message.content}</p>
+                            <div className="message-content">
+    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        {message.content}
+    </ReactMarkdown>
+</div>
                             {message.sources?.length ? (
                                 <details>
                                     <summary>Sources</summary>

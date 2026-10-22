@@ -1,3 +1,4 @@
+import { getAuth } from "@clerk/express";
 import express from "express";
 import { createConversationService } from "../services/conversation.service.js";
 
@@ -14,7 +15,7 @@ async function getDefaultConversationService() {
 }
 
 function createConversationRouter({
-    getClerkId = (req) => req.auth?.userId,
+   getClerkId = (req) => getAuth(req).userId,
     getConversationService = getDefaultConversationService,
 } = {}) {
     const router = express.Router();
