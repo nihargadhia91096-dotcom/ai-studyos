@@ -21,7 +21,13 @@ function createConversationRouter({
     const router = express.Router();
 
     async function withIdentity(req, res, action) {
-        const clerkId = getClerkId(req);
+        let clerkId;
+
+        try {
+            clerkId = getClerkId(req);
+        } catch {
+            clerkId = null;
+        }
 
         if (typeof clerkId !== "string" || !clerkId.trim()) {
             return res.status(401).json({
