@@ -7,12 +7,37 @@ const embeddings = new GoogleGenerativeAIEmbeddings({
 });
 
 async function getVectorStore() {
+    const host = process.env.CHROMA_HOST;
+    const apiKey = process.env.CHROMA_API_KEY;
+    const tenant = process.env.CHROMA_TENANT;
+    const database = process.env.CHROMA_DATABASE;
+
+    if (host && apiKey && tenant && database) {
+        return new Chroma(embeddings, {
+            collectionName: "ai_studyos",
+            url: `https://${host}`,
+            chromaCloudAPIKey: apiKey,
+            clientParams: {
+                tenant,
+                database,
+            },
+        });
+    }
+
+    const chromaAddress =
+        process.env.CHROMA_URL ||
+        process.env.CHROMA_HOSTPORT ||
+        "http://localhost:8000";
+
+    const url = /^https?:\/\//i.test(chromaAddress)
+        ? chromaAddress
+        : `http://${chromaAddress}`;
+
     return new Chroma(embeddings, {
         collectionName: "ai_studyos",
-        url: process.env.CHROMA_URL || "http://localhost:8000",
+        url,
     });
 }
-
 async function storeChunks(chunks, metadata = {}) {
     if (!Array.isArray(chunks) || chunks.length === 0) {
         throw new Error("No chunks provided to store.");
