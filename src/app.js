@@ -9,10 +9,23 @@ import pdfRoutes from "./routes/pdf.routes.js";
 const app = express();
 
 // Middleware
+const allowedOrigins = [
+    process.env.FRONTEND_ORIGIN,
+    "https://ai-studyos.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:8080",
+].filter(Boolean);
+
 app.use(
     cors({
         credentials: true,
-        origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+
+            return callback(new Error(`CORS blocked origin: ${origin}`));
+        },
     }),
 );
 app.use(clerkAuthMiddleware());
