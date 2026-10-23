@@ -1,0 +1,1 @@
+FROM chromadb/chroma:1.5.9

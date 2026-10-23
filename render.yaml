@@ -1,0 +1,45 @@
+services:
+  - type: pserv
+    name: ai-studyos-chroma
+    runtime: docker
+    region: ohio
+    plan: starter
+    dockerfilePath: ./deploy/chroma.Dockerfile
+    dockerContext: .
+    disk:
+      name: chroma-data
+      mountPath: /data
+      sizeGB: 10
+
+  - type: web
+    name: ai-studyos-api
+    runtime: docker
+    region: ohio
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: NODE_ENV
+        value: production
+      - key: CHROMA_HOSTPORT
+        fromService:
+          type: pserv
+          name: ai-studyos-chroma
+          property: hostport
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
+      - key: GEMINI_FALLBACK_MODEL
+        value: gemini-3.6-flash
+      - key: DATABASE_URL
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: FRONTEND_ORIGIN
+        sync: false
