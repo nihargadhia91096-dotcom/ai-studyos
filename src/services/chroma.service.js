@@ -1,5 +1,6 @@
 import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { CloudClient } from "chromadb";
 
 const embeddings = new GoogleGenerativeAIEmbeddings({
     model: "gemini-embedding-001",
@@ -13,14 +14,17 @@ async function getVectorStore() {
     const database = process.env.CHROMA_DATABASE;
 
     if (host && apiKey && tenant && database) {
+        const cloudHost = host.replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+        const client = new CloudClient({
+            apiKey,
+            host: cloudHost,
+            tenant,
+            database,
+        });
+
         return new Chroma(embeddings, {
             collectionName: "ai_studyos",
-            url: `https://${host}`,
-            chromaCloudAPIKey: apiKey,
-            clientParams: {
-                tenant,
-                database,
-            },
+            index: client,
         });
     }
 
