@@ -153,6 +153,39 @@ The API applies committed Prisma migrations before it starts. After the stack
 is healthy, open the configured public origin and verify sign-in, a PDF upload,
 and a document-grounded question.
 
+## ▲ Vercel frontend deployment
+
+Vercel hosts the React/Vite frontend only. The Express API, PostgreSQL, Chroma,
+and uploaded-document storage are not Vercel functions in this repository; run
+the API separately (the included `render.yaml` is the production configuration)
+and point the frontend to its public HTTPS URL.
+
+The root `vercel.json` makes the nested `web` app deployable without relying on
+Vercel dashboard overrides. Import the repository with its **Root Directory**
+set to the repository root, then set these build-time environment variables for
+both Production and Preview deployments:
+
+```text
+VITE_CLERK_PUBLISHABLE_KEY=pk_...
+VITE_API_URL=https://your-ai-studyos-api.onrender.com
+```
+
+`VITE_` variables are bundled into the browser application, so only use public
+values there—never `CLERK_SECRET_KEY`, `DATABASE_URL`, or `GOOGLE_API_KEY`.
+Set `FRONTEND_ORIGIN` on the API to the Vercel production URL (and allow any
+preview URL you intend to use). After saving or changing either Vercel variable,
+redeploy: Vite reads them during the build, not when the page is opened.
+
+Verify the two services independently after deployment:
+
+```text
+https://your-vercel-app.vercel.app/                 # React frontend
+https://your-ai-studyos-api.onrender.com/api/health # Express API
+```
+
+The API path is intentionally not available at the Vercel URL unless a separate
+Vercel API deployment or rewrite is added.
+
 ## 🔌 API Endpoints
 
 ### Health Check
