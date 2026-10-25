@@ -160,10 +160,10 @@ and uploaded-document storage are not Vercel functions in this repository; run
 the API separately (the included `render.yaml` is the production configuration)
 and point the frontend to its public HTTPS URL.
 
-The root `vercel.json` makes the nested `web` app deployable without relying on
+`web/vercel.json` makes the frontend build reproducible without relying on
 Vercel dashboard overrides. Import the repository with its **Root Directory**
-set to the repository root, then set these build-time environment variables for
-both Production and Preview deployments:
+set to `web`, then set these build-time environment variables for both
+Production and Preview deployments:
 
 ```text
 VITE_CLERK_PUBLISHABLE_KEY=pk_...
